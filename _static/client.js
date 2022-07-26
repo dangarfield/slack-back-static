@@ -22,7 +22,7 @@ const stringFromUrlString = (urlDate) => {
 const getDataUrl = async () => {
   if (window.location.href.includes('localhost')) {
     return 'data/data.json'
-  } else {
+  } else if (window.location.href.includes('netlify.app')) {
     // Hacky example - Just use any password protected static site
     let password = window.localStorage.getItem('password')
     if (!password) {
@@ -40,6 +40,8 @@ const getDataUrl = async () => {
       window.localStorage.setItem('password', password)
       return authRes.dataPath
     }
+  } else {
+    return 'data/data.json'
   }
 }
 const getData = async () => {
@@ -127,27 +129,28 @@ const showFiles = async (page) => {
   allHtml += '<div class="files">'
 
   for (const file of filesOnPage) {
-    // TODO - not all files are images
-    if (file.mimetype.includes('image')) {
-      allHtml += `<a href="${FILES_PATH}/${file.id}.${file.filetype}" target="_blank">
-            <img class="img-thumbnail" src="${FILES_PATH}/${file.id}.${file.filetype}" />
-          </a>`
-    } else if (file.mimetype.includes('video')) {
-      allHtml += `<a href="${FILES_PATH}/${file.id}.${file.filetype}" target="_blank" class="btn btn-secondary m-1">
-            <i class="bi bi-camera-reels big-icon"></i><br/>${file.name}
-          </a>`
-    } else if (file.mimetype.includes('audio')) {
-      allHtml += `<a href="${FILES_PATH}/${file.id}.${file.filetype}" target="_blank" class="btn btn-secondary m-1">
-            <i class="bi bi-cassette big-icon"></i><br/>${file.name}
-          </a>`
-    } else if (file.mimetype.includes('pdf')) {
-      allHtml += `<a href="${FILES_PATH}/${file.id}.${file.filetype}" target="_blank" class="btn btn-secondary m-1">
-            <i class="bi bi-file-pdf big-icon"></i><br/>${file.name}
-          </a>`
-    } else {
-      allHtml += `<a href="${FILES_PATH}/${file.id}.${file.filetype}" target="_blank" class="btn btn-secondary m-1">
-            <i class="bi bi-file-earmark-arrow-down big-icon"></i><br/>${file.name}
-          </a>`
+    if(file && file.mimetype) {
+      if (file.mimetype.includes('image')) {
+        allHtml += `<a href="${FILES_PATH}/${file.id}.${file.filetype}" target="_blank">
+              <img class="img-thumbnail" src="${FILES_PATH}/${file.id}.${file.filetype}" />
+            </a>`
+      } else if (file.mimetype.includes('video')) {
+        allHtml += `<a href="${FILES_PATH}/${file.id}.${file.filetype}" target="_blank" class="btn btn-secondary m-1">
+              <i class="bi bi-camera-reels big-icon"></i><br/>${file.name}
+            </a>`
+      } else if (file.mimetype.includes('audio')) {
+        allHtml += `<a href="${FILES_PATH}/${file.id}.${file.filetype}" target="_blank" class="btn btn-secondary m-1">
+              <i class="bi bi-cassette big-icon"></i><br/>${file.name}
+            </a>`
+      } else if (file.mimetype.includes('pdf')) {
+        allHtml += `<a href="${FILES_PATH}/${file.id}.${file.filetype}" target="_blank" class="btn btn-secondary m-1">
+              <i class="bi bi-file-pdf big-icon"></i><br/>${file.name}
+            </a>`
+      } else {
+        allHtml += `<a href="${FILES_PATH}/${file.id}.${file.filetype}" target="_blank" class="btn btn-secondary m-1">
+              <i class="bi bi-file-earmark-arrow-down big-icon"></i><br/>${file.name}
+            </a>`
+      }
     }
   }
   allHtml += '</div>'
@@ -208,27 +211,28 @@ const loadChannelMessagesOnDate = (channel, date, datepicker, messageId) => {
       if (messageToAdd.files) {
         filesHtml += '<div class="files">'
         for (const file of messageToAdd.files) {
-          // TODO - not all files are images
-          if (file.mimetype.includes('image')) {
-            filesHtml += `<a href="${FILES_PATH}/${file.id}.${file.filetype}" target="_blank">
-                      <img class="img-thumbnail" src="${FILES_PATH}/${file.id}.${file.filetype}" />
-                    </a>`
-          } else if (file.mimetype.includes('video')) {
-            filesHtml += `<a href="${FILES_PATH}/${file.id}.${file.filetype}" target="_blank" class="btn btn-secondary m-1">
-                      <i class="bi bi-camera-reels big-icon"></i><br/>${file.name}
-                    </a>`
-          } else if (file.mimetype.includes('audio')) {
-            filesHtml += `<a href="${FILES_PATH}/${file.id}.${file.filetype}" target="_blank" class="btn btn-secondary m-1">
-                      <i class="bi bi-cassette big-icon"></i><br/>${file.name}
-                    </a>`
-          } else if (file.mimetype.includes('pdf')) {
-            filesHtml += `<a href="${FILES_PATH}/${file.id}.${file.filetype}" target="_blank" class="btn btn-secondary m-1">
-                      <i class="bi bi-file-pdf big-icon"></i><br/>${file.name}
-                    </a>`
-          } else {
-            filesHtml += `<a href="${FILES_PATH}/${file.id}.${file.filetype}" target="_blank" class="btn btn-secondary m-1">
-                      <i class="bi bi-file-earmark-arrow-down big-icon"></i><br/>${file.name}
-                    </a>`
+          if(file && file.mimetype) {
+            if (file.mimetype.includes('image')) {
+              filesHtml += `<a href="${FILES_PATH}/${file.id}.${file.filetype}" target="_blank">
+                        <img class="img-thumbnail" src="${FILES_PATH}/${file.id}.${file.filetype}" />
+                      </a>`
+            } else if (file.mimetype.includes('video')) {
+              filesHtml += `<a href="${FILES_PATH}/${file.id}.${file.filetype}" target="_blank" class="btn btn-secondary m-1">
+                        <i class="bi bi-camera-reels big-icon"></i><br/>${file.name}
+                      </a>`
+            } else if (file.mimetype.includes('audio')) {
+              filesHtml += `<a href="${FILES_PATH}/${file.id}.${file.filetype}" target="_blank" class="btn btn-secondary m-1">
+                        <i class="bi bi-cassette big-icon"></i><br/>${file.name}
+                      </a>`
+            } else if (file.mimetype.includes('pdf')) {
+              filesHtml += `<a href="${FILES_PATH}/${file.id}.${file.filetype}" target="_blank" class="btn btn-secondary m-1">
+                        <i class="bi bi-file-pdf big-icon"></i><br/>${file.name}
+                      </a>`
+            } else {
+              filesHtml += `<a href="${FILES_PATH}/${file.id}.${file.filetype}" target="_blank" class="btn btn-secondary m-1">
+                        <i class="bi bi-file-earmark-arrow-down big-icon"></i><br/>${file.name}
+                      </a>`
+            }
           }
         }
         filesHtml += '</div>'
@@ -478,7 +482,7 @@ const init = async () => {
     await indexSearch()
     initRouting()
   } else {
-    window.alert('Access Denied')
+    document.querySelector('.content').innerHTML = '<h1>Access Denied</h1>'
   }
 }
 
