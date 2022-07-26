@@ -1,7 +1,7 @@
 # Slack Back Static
 > Download and view your slack history, channels and messages
 
-<!-- ![alt text](https://gitcdn.link/cdn/dangarfield/fibonacci-tattoo/main/fib-tattoo.png "Fractional Fibonacci") -->
+![alt text](https://i.ibb.co/yd79rsw/Screenshot-2022-07-26-at-19-45-02.png "Slack Back Static")
 
 ## Overview
 
