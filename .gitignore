@@ -1,0 +1,7 @@
+data
+files
+.env
+node_modules
+.git
+.netlify
+.DS_Store

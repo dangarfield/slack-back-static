@@ -1,0 +1,25 @@
+{
+    "name": "slack-back-static",
+    "version": "1.0.0",
+    "description": "Download and view your slack history, channels and messages",
+    "main": "app.js",
+    "scripts": {
+        "start": "node app.js",
+        "static": "serve ./_static",
+        "deploy": "netlify deploy --prod"
+    },
+    "dependencies": {
+        "@slack/web-api": "^6.7.2",
+        "dotenv": "^16.0.1",
+        "node-fetch": "^2.6.7",
+        "request": "^2.88.2",
+        "safe-compare": "^1.1.4",
+        "static-auth": "^2.1.2"
+    },
+    "nodemonConfig": {
+        "ignore": [
+            "data*",
+            "files*"
+        ]
+    }
+}
