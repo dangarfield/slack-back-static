@@ -270,7 +270,8 @@ const loadChannelMessagesOnDate = (channel, date, datepicker, messageId) => {
     pageLink.addEventListener('click', function (e) {
       const linkDate = pageLink.getAttribute('data-date')
       datepicker.setFullDate(dateFromString(linkDate))
-      loadChannelMessagesOnDate(channel, linkDate, datepicker)
+      console.log('channel pagination', channel.id, urlStringFromString(linkDate))
+      router.navigateTo(`channel/${channel.id}/${urlStringFromString(linkDate)}`)
     })
   }
   // const tStop = new Date()
@@ -325,10 +326,11 @@ const loadChannel = async (channelId, intendedDate, messageId) => {
   }
   const datepicker = MCDatepicker.create(datepickerOptions)
 
-  datepicker.setFullDate(dateFromString(lastDate))
+  datepicker.setFullDate(dateFromString(intendedDate))
   datepicker.onSelect((date, formatedDate) => {
     console.log('Selected date: ' + date, stringFromDate(date))
-    loadChannelMessagesOnDate(channel, stringFromDate(date), datepicker, messageId)
+    // loadChannelMessagesOnDate(channel, stringFromDate(date), datepicker, messageId)
+    router.navigateTo(`channel/${channel.id}/${urlStringFromString(stringFromDate(date))}`)
   })
 
   loadChannelMessagesOnDate(channel, intendedDate, datepicker, messageId)
