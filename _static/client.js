@@ -53,6 +53,12 @@ const getData = async () => {
       const jsDate = new Date(1000 * parseInt(message.ts.split('.')[0]))
       message.day = stringFromDate(jsDate)
       message.time = `${jsDate.getHours()}:${(jsDate.getMinutes() + '').padStart(2, '0')}`
+      if (message.replies) {
+        for (const reply of message.replies) {
+          const jsDate = new Date(1000 * parseInt(reply.ts.split('.')[0]))
+          reply.time = `${jsDate.getHours()}:${(jsDate.getMinutes() + '').padStart(2, '0')}`
+        }
+      }
     }
     channel.messagesByDate = groupBy(channel.messages, v => v.day)
   }
@@ -252,7 +258,26 @@ const loadChannelMessagesOnDate = (channel, date, datepicker, messageId) => {
                 <div class="message">
                     ${lightMarkdown.toHtml(messageToAdd.text)}
                     ${messageToAdd.edited ? '(edited)' : ''}
-                    ${messageToAdd.replies ? `${messageToAdd.replies} - UI to be added`:''}
+                    ${messageToAdd.replies? `
+                    ${messageToAdd.replies.map(reply => {
+                      return `
+                      <div class="d-flex reply-holder">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-arrow-return-right"></i>
+                            <img src="${data.users[reply.user].image_72}" class="rounded avatar">
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                          <div class="info">
+                              <span class="name"><b>${reply.display_name}</b></span> <span class="time">${reply.time}</span>
+                          </div>
+                          <div class="message">
+                            ${lightMarkdown.toHtml(reply.text)}
+                          </div>
+                        </div>
+                      </div>
+                      `
+                    }).join('')}
+                  `:''}
                 </div>
                 ${filesHtml}
             </div>
