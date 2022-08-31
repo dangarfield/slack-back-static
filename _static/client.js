@@ -252,6 +252,7 @@ const loadChannelMessagesOnDate = (channel, date, datepicker, messageId) => {
                 <div class="message">
                     ${lightMarkdown.toHtml(messageToAdd.text)}
                     ${messageToAdd.edited ? '(edited)' : ''}
+                    ${messageToAdd.replies ? `${messageToAdd.replies} - UI to be added`:''}
                 </div>
                 ${filesHtml}
             </div>
@@ -339,12 +340,15 @@ const indexSearch = async () => {
   // console.log('indexSearch')
   miniSearch = new MiniSearch({
     fields: ['text'],
-    storeFields: ['text', 'channelId', 'day', 'time', 'user', 'ts']
+    storeFields: ['text', 'channelId', 'day', 'time', 'user', 'ts','replies']
   })
   const docs = []
   for (const channel of data.channels) {
     for (const message of channel.messages) {
       if (message.client_msg_id) {
+        if (message.replies) {
+console.log('message', message)
+        }
         docs.push({
           id: message.client_msg_id,
           text: message.text,
@@ -352,7 +356,8 @@ const indexSearch = async () => {
           day: message.day,
           time: message.time,
           user: message.user,
-          ts: parseInt(message.ts.split('.'))
+          ts: parseInt(message.ts.split('.')),
+          replies: message.replies
         })
       }
     }
@@ -370,17 +375,30 @@ const indexSearch = async () => {
     router.navigateTo(`search/${searchTerm}`)
   })
 }
-const executeSearch = async (searchTerm) => {
+const executeSearch = async (searchTerm,page) => {
   let results = miniSearch.search(searchTerm, { combineWith: 'AND' })
   results = results.sort((a,b) => b.ts - a.ts)
   const totalResults = results.length
-  const resultsSliced = results.slice(0,50)
+  const resultsSliced = results.slice((page-1)*50,((page-1)*50)+50)
   const resultsTitle = totalResults !== resultsSliced.length ? `${resultsSliced.length} of ${totalResults} results` : `${resultsSliced.length} results`
   // console.log('search', searchTerm, resultsSliced, resultsTitle)
   setTitle('Search', searchTerm, resultsTitle)
   let allHtml = ''
   allHtml += `<h3>Search for '${searchTerm}' - ${resultsTitle} (Sorted by most recent message)</h3>`
+
+  const maxPage = Math.ceil(totalResults / 50)
+  let navHtml = `<ul class="pagination justify-content-center">`
+  for (let i = 1; i <= maxPage; i++) {
+    navHtml += `<li class="page-item${page === i ? ' disabled' : ''}">
+          <button class="page-link" data-page="${i}">${i}</button>
+        </li>`
+  }
+  navHtml += '</ul>'
+  allHtml += navHtml
+
+
   for (const result of resultsSliced) {
+    console.log('result', result)
     const avatar = data.users[result.user].image_72
     const name = data.users[result.user].name
     const channel = data.channels.find(c => c.id === result.channelId)
@@ -412,6 +430,7 @@ const executeSearch = async (searchTerm) => {
         </div>
       </div>`
   }
+  allHtml += navHtml
   document.querySelector('.content').innerHTML = allHtml
   for (const resultLink of Array.from(document.querySelectorAll('.result'))) {
     resultLink.addEventListener('click', function (e) {
@@ -422,6 +441,14 @@ const executeSearch = async (searchTerm) => {
       router.navigateTo(`channel/${channelId}/${date}/${messageId}`)
     })
   }
+
+  for (const pageLink of Array.from(document.querySelectorAll('.pagination .page-link'))) {
+    pageLink.addEventListener('click', function (e) {
+      const linkPage = parseInt(pageLink.getAttribute('data-page'))
+      router.navigateTo(`search/${searchTerm}/${linkPage}`)
+    })
+  }
+  window.scrollTo({top: 0, behavior: 'instant'})
 }
 const initRouting = () => {
   router = new Router({
@@ -437,15 +464,23 @@ const initRouting = () => {
 
   const searchField = document.querySelector('#search-field')
   router.add('search', function () {
-    executeSearch('')
+    executeSearch('', 1)
   })
   router.add(/^search\/(.+)/i, function (searchTerm) {
-    console.log('Open search per with term', searchTerm)
-    const decodedSearchTerm = decodeURIComponent(searchTerm)
+
+    let decodedSearchTerm = decodeURIComponent(searchTerm)
+    let page = 1
+    if (decodedSearchTerm.indexOf('/') > 0) {
+    const splitSearch = decodedSearchTerm.split('/')
+    decodedSearchTerm = splitSearch[0]
+    page = parseInt(splitSearch[1])
+    }
+    console.log('Open search per with term', searchTerm, decodedSearchTerm, page)
+
     if (searchField.value !== decodedSearchTerm) {
       searchField.value = decodedSearchTerm
     }
-    executeSearch(decodedSearchTerm)
+    executeSearch(decodedSearchTerm, page)
   })
 
   router.add('files/{page}', function (page) {

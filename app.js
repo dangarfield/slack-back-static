@@ -111,6 +111,17 @@ const getChannelData = async () => {
         }
         for (let message of res.messages) {
           message.display_name = await getUserName(message.user)
+          if (message.thread_ts) {
+            // console.log('Message with thread', message)
+            const replies = (await web.conversations.replies({ts: message.thread_ts, channel: channel.id})).messages
+            replies.shift()
+            for (const reply of replies) {
+              reply.display_name = await getUserName(reply.user)
+            }
+            // console.log('replies', replies)
+            message.replies = replies
+          }
+
           delete message.blocks
         }
         // console.log('acc', acc)

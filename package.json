@@ -6,7 +6,8 @@
     "scripts": {
         "start": "node app.js",
         "static": "serve ./_static",
-        "deploy": "netlify deploy --prod"
+        "deploy": "netlify deploy --prod",
+        "all": "node app.js && netlify deploy --prod"
     },
     "dependencies": {
         "@slack/web-api": "^6.7.2",
