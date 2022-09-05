@@ -161,7 +161,7 @@ const getFiles = async () => {
       files.push(file)
       await downloadFile(file)
     }
-    console.log('filesData', filesData.files[0].id, filesData.paging, files.length)
+    console.log('filesData', filesData.paging, files.length)
   }
   return files
 }
