@@ -173,7 +173,6 @@ const init = async () => {
   const channels = await getChannelData()
   const files = await getFiles()
   await writeData(existingData, channels, files)
-  //   await generatePages(existingData)
   console.log('end')
 }
 init()
