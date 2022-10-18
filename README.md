@@ -8,6 +8,7 @@
 Slack premium is pretty expensive for something simple and opensource.
 Use this to download and navigate your slack history, it will keep a record of the messages and files previously downloaded across channels and private messages.
 
+
 ## Usage
 
 - Clone the repo
