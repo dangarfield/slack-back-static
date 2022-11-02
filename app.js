@@ -2,6 +2,7 @@ const { WebClient } = require('@slack/web-api')
 const request = require('request')
 
 const fs = require('fs')
+const path = require('path')
 require('dotenv').config()
 
 let channelsWithErrors = []
@@ -174,9 +175,20 @@ const getFiles = async () => {
   return files
 }
 
+const ensureDataFolders = async () => {
+  const dataFolderPath = path.dirname(path.join(DATA_PATH))
+  if (!fs.existsSync(dataFolderPath)) {
+    fs.mkdirSync(dataFolderPath)
+  }
+  const filesFolderPath = path.join(FILES_PATH)
+  if (!fs.existsSync(filesFolderPath)) {
+    fs.mkdirSync(filesFolderPath)
+  }
+}
+
 const init = async () => {
   web = new WebClient(process.env.SLACK_BOT_TOKEN)
-
+  await ensureDataFolders()
   const existingData = await loadData()
   const channels = await getChannelData()
   const files = await getFiles()
