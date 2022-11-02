@@ -1,4 +1,4 @@
-const { WebClient } = require('@slack/web-api')
+const { WebClient, LogLevel } = require('@slack/web-api')
 const request = require('request')
 
 const fs = require('fs')
@@ -108,7 +108,7 @@ const getChannelData = async () => {
     try {
       channel.messages = await web.paginate(
         'conversations.history',
-        {channel: channel.id, oldest: 0},
+        {channel: channel.id, team_id: process.env.SLACK_SPACE, oldest: 0},
         (res) => res.has_more === false, // temp - set to false
         async (acc, res, idx) => {
           if (acc === undefined) {
@@ -187,7 +187,9 @@ const ensureDataFolders = async () => {
 }
 
 const init = async () => {
-  web = new WebClient(process.env.SLACK_BOT_TOKEN)
+  web = new WebClient(process.env.SLACK_BOT_TOKEN, {
+    logLevel: LogLevel.DEBUG
+  })
   await ensureDataFolders()
   const existingData = await loadData()
   const channels = await getChannelData()
