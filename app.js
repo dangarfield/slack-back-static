@@ -100,7 +100,11 @@ const getChannelData = async () => {
   const channels = (await web.conversations.list({types: 'public_channel, private_channel, mpim, im'})).channels
 
   for (const channel of channels) {
-    console.log('channel im ->', channel.name, channel.user, channel.id)
+    
+    console.log('Fetching channel -', channel.id, '->', channel.name ? `Channel: ${channel.name}` : `IM: ${channel.user}`)
+    const conversationInfo = await web.conversations.info({channel: channel.id})
+    console.log('Channel details', conversationInfo)
+
     channel.messages = await web.paginate(
       'conversations.history',
       {channel: channel.id, oldest: 0},

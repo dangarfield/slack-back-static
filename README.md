@@ -20,6 +20,7 @@ Use this to download and navigate your slack history, it will keep a record of t
     - channels:read
     - files:read
     - groups:read
+    - groups:history
     - im:history
     - im:read
     - mpim:history
