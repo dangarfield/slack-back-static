@@ -4,6 +4,7 @@ const request = require('request')
 const fs = require('fs')
 require('dotenv').config()
 
+let channelsWithErrors = []
 let web
 const users = {}
 
@@ -74,7 +75,7 @@ const writeData = (existingData, channels, files) => {
       existingData.channels.push(channel)
     }
   }
-  console.log('existingData.channels', existingData.channels[7].messages.length, channels[7].messages.length)
+  console.log('existingData.channels')//, existingData.channels[7].messages.length, channels[7].messages.length)
 
   // Combine saved and new files data
   for (const file of files) {
@@ -101,39 +102,42 @@ const getChannelData = async () => {
 
   for (const channel of channels) {
     
-    console.log('Fetching channel -', channel.id, '->', channel.name ? `Channel: ${channel.name}` : `IM: ${channel.user}`)
-    const conversationInfo = await web.conversations.info({channel: channel.id})
-    console.log('Channel details', conversationInfo)
+    console.log('Fetching channel -', channel.id, '->', channel.name ? `Channel: ${channel.name}` : `IM: ${await getUserName(channel.user)} (${channel.user})`)
 
-    channel.messages = await web.paginate(
-      'conversations.history',
-      {channel: channel.id, oldest: 0},
-      (res) => res.has_more === false, // temp - set to false
-      async (acc, res, idx) => {
-        if (acc === undefined) {
-          acc = []
-        }
-        for (let message of res.messages) {
-          message.display_name = await getUserName(message.user)
-          if (message.thread_ts) {
-            // console.log('Message with thread', message)
-            const replies = (await web.conversations.replies({ts: message.thread_ts, channel: channel.id})).messages
-            replies.shift()
-            for (const reply of replies) {
-              reply.display_name = await getUserName(reply.user)
-            }
-            // console.log('replies', replies)
-            message.replies = replies
+    try {
+      channel.messages = await web.paginate(
+        'conversations.history',
+        {channel: channel.id, oldest: 0},
+        (res) => res.has_more === false, // temp - set to false
+        async (acc, res, idx) => {
+          if (acc === undefined) {
+            acc = []
           }
-
-          delete message.blocks
+          for (let message of res.messages) {
+            message.display_name = await getUserName(message.user)
+            if (message.thread_ts) {
+              // console.log('Message with thread', message)
+              const replies = (await web.conversations.replies({ts: message.thread_ts, channel: channel.id})).messages
+              replies.shift()
+              for (const reply of replies) {
+                reply.display_name = await getUserName(reply.user)
+              }
+              // console.log('replies', replies)
+              message.replies = replies
+            }
+  
+            delete message.blocks
+          }
+          // console.log('acc', acc)
+          acc = (await acc).concat(res.messages)
+          console.log('       Found ', acc.length, 'messages')
+          return acc
         }
-        // console.log('acc', acc)
-        acc = (await acc).concat(res.messages)
-        console.log('       Found ', acc.length, 'messages')
-        return acc
-      }
-    )
+      )
+    } catch (error) {
+      console.error('Channel error', error)
+      channelsWithErrors.push(channel)
+    }
   }
   return channels
 }
@@ -177,6 +181,14 @@ const init = async () => {
   const channels = await getChannelData()
   const files = await getFiles()
   await writeData(existingData, channels, files)
-  console.log('end')
+  
+  if (channelsWithErrors.length > 0) {
+    for (const channel of channelsWithErrors) {
+      const conversationInfo = await web.conversations.info({channel: channel.id})
+      console.log('Channel with error', channel, 'full info:', conversationInfo)
+    }
+    console.log('Channels with error count:', channelsWithErrors.length)
+  }
+  console.log('End')
 }
 init()
