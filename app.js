@@ -114,7 +114,12 @@ const writeData = (existingData, channels, files) => {
   }))
 }
 const getChannelData = async () => {
-  const channels = (await web.conversations.list({types: 'public_channel, private_channel, mpim, im'})).channels
+  let channels = (await web.conversations.list({types: 'public_channel, private_channel, mpim, im'})).channels
+
+  if (process.env.SLACK_CHANNELS) {
+    const channelsToUse = process.env.SLACK_CHANNELS.split(',')
+    channels = channels.filter(c => channelsToUse.includes(c.id))
+  }
 
   for (const channel of channels) {
     
@@ -172,14 +177,18 @@ const downloadFile = async (file) => {
     }).pipe(fs.createWriteStream(filePath))
   }
 }
-const getFiles = async () => {
+const getFiles = async (optionalChannelId) => {
   let isLastPage = false
-  let page = 1
+  const options = {page:0}
   const files = []
+  if (optionalChannelId) {
+    options.channel = optionalChannelId
+  }
+
   while (!isLastPage) {
-    // console.log('fetching', {page: page})
-    const filesData = await web.files.list({page: page})
-    page++
+    // console.log('fetching', options)
+    const filesData = await web.files.list(options)
+    options.page++
     if (filesData.paging.page === filesData.paging.pages) {
       isLastPage = true
     }
@@ -214,7 +223,17 @@ const init = async () => {
   await ensureDataFolders()
   const existingData = await loadData()
   const channels = await getChannelData()
-  const files = await getFiles()
+
+  const files = []
+  if (process.env.SLACK_CHANNELS) {
+    const channelsToUse = process.env.SLACK_CHANNELS.split(',')
+    for (const channelId of channelsToUse) {
+      files.push(...await getFiles(channelId))
+    }
+  } else {
+    files.push(await getFiles())
+  }
+
   await writeData(existingData, channels, files)
   
   if (channelsWithErrors.length > 0) {

@@ -240,6 +240,9 @@ const loadChannelMessagesOnDate = (channel, date, datepicker, messageId) => {
                       </a>`
             }
           }
+          if (file.mode && file.mode === 'hidden_by_limit') {
+            filesHtml += `<p>File <code>${file.id}</code> hidden by limit</p>`
+          }
         }
         filesHtml += '</div>'
       }
