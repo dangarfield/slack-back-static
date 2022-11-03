@@ -192,7 +192,7 @@ const getFiles = async (optionalChannelId) => {
     if (filesData.paging.page === filesData.paging.pages) {
       isLastPage = true
     }
-    if (filesData.total === 0) {
+    if (filesData.paging.total === 0) {
       isLastPage = true
     }
     for (const file of filesData.files) {
