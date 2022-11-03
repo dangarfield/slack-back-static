@@ -30,7 +30,7 @@ Use this to download and navigate your slack history, it will keep a record of t
 - Copy the `.env.example` file to `.env`
 - In the slack `OAuth & Permissions` settings, get the `User OAuth Token` from the slack app and add to your `.env` file as the `SLACK_BOT_TOKEN` property `(see config image 2 below)`
 - Add the slack space id (also known as, team ID) from your slack workspace and add to your `.env` file as the `SLACK_SPACE` property - Get this by opening slack in browser and looking at the URL `(see config image 3 below)`
-- Optional: You can download only specific channels (and files in those channels) by including a `SLACK_CHANNELS` variable in yur `.env` file. This can be a single channel id, or mutiple channels separated with a comma (no space). Omitting this variable will download all channels and files.
+- Optional: You can download only specific channels (and files in those channels) by including a `SLACK_CHANNELS` variable in yur `.env` file. This can be a single channel id, or mutiple channel IDs separated with a comma (no space). Omitting this variable will download all channels and files. Get this by opening slack in browser and looking at the URL `(see config image 3 below)`
 - Optional: Add a `STATIC_PASSWORD` property to the `.env` file if you wish to use `netlify dev` locally
 - Run `npm start` or `node app.js` to begin downloading your slack messages and files
 - All files added to `_static/files/*` folder. All data added to `_static/data/data.json`
