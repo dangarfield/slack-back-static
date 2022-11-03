@@ -116,10 +116,14 @@ const writeData = (existingData, channels, files) => {
 const getChannelData = async () => {
   let channels = (await web.conversations.list({types: 'public_channel, private_channel, mpim, im'})).channels
 
+  console.log('channels', channels.map(c => c.id))
+
   if (process.env.SLACK_CHANNELS) {
     const channelsToUse = process.env.SLACK_CHANNELS.split(',')
     channels = channels.filter(c => channelsToUse.includes(c.id))
+    console.log('channels after filtering', channels.map(c => c.id))
   }
+  
 
   for (const channel of channels) {
     
@@ -225,6 +229,11 @@ const init = async () => {
   web = new WebClient(process.env.SLACK_BOT_TOKEN, webclientOptions)
   await ensureDataFolders()
   const existingData = await loadData()
+
+  if (process.env.SLACK_CHANNELS) {
+    const channelsToUse = process.env.SLACK_CHANNELS.split(',')
+    console.log('Filtering for channels', channelsToUse)
+  }
   const channels = await getChannelData()
 
   const files = []
