@@ -5,6 +5,7 @@
     "main": "app.js",
     "scripts": {
         "start": "node app.js",
+        "debug": "node app.js --log-debug",
         "static": "serve ./_static",
         "deploy": "netlify deploy --prod",
         "all": "node app.js && netlify deploy --prod"

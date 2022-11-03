@@ -12,16 +12,31 @@ const users = {}
 const DATA_PATH = './_static/data/data.json'
 const FILES_PATH = './_static/files'
 
+const ensureCorrectUserName = (obj) => {
+  if (obj.user === undefined) {
+    obj.user = 'undefined'
+  }
+}
 const getUserName = async (userId) => {
   if (!users[userId]) {
-    const userDetails = await web.users.info({user: userId})
-    users[userId] = {
-      name: userDetails.user.profile.display_name !== '' ? userDetails.user.profile.display_name : userDetails.user.profile.real_name,
-      image_72: userDetails.user.profile.image_72,
-      image_1024: userDetails.user.profile.image_1024
+    try {
+      const userDetails = await web.users.info({user: userId})
+      users[userId] = {
+        name: userDetails.user.profile.display_name !== '' ? userDetails.user.profile.display_name : userDetails.user.profile.real_name,
+        image_72: userDetails.user.profile.image_72,
+        image_1024: userDetails.user.profile.image_1024
+      }
+      // console.log('getUserName FETCHED', userId, users[userId])
+    } catch (error) {
+      users[userId] = {
+        name: `Unknown - ${userId}`,
+        image_72: 'https://ui-avatars.com/api/?name=un&size=72',
+        image_1024: 'https://ui-avatars.com/api/?name=un&size=1024'
+      }
+      // console.log('getUserName ERROR', userId, users[userId])
     }
-    // console.log('getUserName', userDetails, userId, users[userId])
   }
+  // console.log('getUserName ALREADY GOT', userId, users[userId])
   return users[userId].name
 }
 const loadData = () => {
@@ -115,12 +130,14 @@ const getChannelData = async () => {
             acc = []
           }
           for (let message of res.messages) {
+            ensureCorrectUserName(message)
             message.display_name = await getUserName(message.user)
             if (message.thread_ts) {
               // console.log('Message with thread', message)
               const replies = (await web.conversations.replies({ts: message.thread_ts, channel: channel.id})).messages
               replies.shift()
               for (const reply of replies) {
+                ensureCorrectUserName(reply)
                 reply.display_name = await getUserName(reply.user)
               }
               // console.log('replies', replies)
@@ -137,6 +154,7 @@ const getChannelData = async () => {
       )
     } catch (error) {
       console.error('Channel error', error)
+      channel.messages = []
       channelsWithErrors.push(channel)
     }
   }
@@ -166,6 +184,7 @@ const getFiles = async () => {
       isLastPage = true
     }
     for (const file of filesData.files) {
+      ensureCorrectUserName(file)
       file.display_name = await getUserName(file.user)
       files.push(file)
       await downloadFile(file)
@@ -187,9 +206,11 @@ const ensureDataFolders = async () => {
 }
 
 const init = async () => {
-  web = new WebClient(process.env.SLACK_BOT_TOKEN, {
-    logLevel: LogLevel.DEBUG
-  })
+  let webclientOptions = {}
+  if (process.argv.slice(2).includes('--log-debug')) {
+    webclientOptions.logLevel = LogLevel.DEBUG
+  }
+  web = new WebClient(process.env.SLACK_BOT_TOKEN, webclientOptions)
   await ensureDataFolders()
   const existingData = await loadData()
   const channels = await getChannelData()
