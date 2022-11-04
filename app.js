@@ -237,7 +237,9 @@ const init = async () => {
   const channels = await getChannelData()
 
   const files = []
-  if (process.env.SLACK_CHANNELS) {
+  if (process.env.DONT_DOWNLOAD_FILES) {
+    console.log('Not downloading files')
+  } else if (process.env.SLACK_CHANNELS) {
     const channelsToUse = process.env.SLACK_CHANNELS.split(',')
     for (const channelId of channelsToUse) {
       files.push(...await getFiles(channelId))
