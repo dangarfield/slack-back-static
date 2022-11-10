@@ -11,7 +11,6 @@ const handler = async function (event, context) {
   } catch (error) {
     // console.log('Error', error)
   }
-  // console.log('res', res)
   return {
     statusCode: 200,
     body: JSON.stringify(res)
