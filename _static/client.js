@@ -24,6 +24,7 @@ const getDataUrl = async () => {
     return 'data/data.json'
   } else if (window.location.href.includes('netlify.app')) {
     // Hacky example - Just use any password protected static site
+    
     let password = window.localStorage.getItem('password')
     if (!password) {
       password = window.prompt('Enter password')
